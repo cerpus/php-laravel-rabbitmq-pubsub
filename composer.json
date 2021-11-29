@@ -40,7 +40,7 @@
                 "Cerpus\\LaravelRabbitMQPubSub\\RabbitMQPubSubServiceProvider"
             ],
             "facades": [
-                "Cerpus\\LaravelRabbitMQPubSub\\RabbitMQPubSub"
+                "Cerpus\\LaravelRabbitMQPubSub\\Facades\\RabbitMQPubSub"
             ]
         }
     }
