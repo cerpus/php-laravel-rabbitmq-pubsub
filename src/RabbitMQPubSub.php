@@ -41,6 +41,6 @@ class RabbitMQPubSub
     public function publish(string $topicName, string $data)
     {
         Log::info("Publish message to $topicName with data $data");
-        $this->getTopicChannel($topicName)->basic_publish(new AMQPMessage($data));
+        $this->getTopicChannel($topicName)->basic_publish(new AMQPMessage($data), $topicName);
     }
 }
