@@ -1,6 +1,6 @@
 <?php
 
-namespace Cerpus\LaravelRabbitMQPubSub;
+namespace Cerpus\LaravelRabbitMQPubSub\Commands;
 
 
 use Illuminate\Console\Command;

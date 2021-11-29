@@ -2,6 +2,7 @@
 
 namespace Cerpus\LaravelRabbitMQPubSub;
 
+use Cerpus\LaravelRabbitMQPubSub\Commands\ConsumerCommand;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\ServiceProvider;
 
