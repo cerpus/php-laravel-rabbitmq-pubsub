@@ -22,7 +22,7 @@ class RabbitMQPubSub
         $this->connection = new AMQPStreamConnection(
             config('rabbitMQPubSub.connection.host'),
             config('rabbitMQPubSub.connection.port'),
-            config('rabbitMQPubSub.connection.user'),
+            config('rabbitMQPubSub.connection.username'),
             config('rabbitMQPubSub.connection.password')
         );
     }
