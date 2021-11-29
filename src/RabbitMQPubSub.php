@@ -70,7 +70,7 @@ class RabbitMQPubSub
                     throw new LaravelRabbitMQPubSubException("Handler does not implement RabbitMQPubSubConsumerHandler");
                 }
 
-                $this->channel->queue_declare($subscriptionName, false, true, true, false);
+                $this->channel->queue_declare($subscriptionName, false, true, false, false);
                 $this->channel->queue_bind($subscriptionName, $topicName);
 
                 $callback = function ($msg) use ($handler) {
@@ -84,5 +84,8 @@ class RabbitMQPubSub
         while ($this->channel->is_open()) {
             $this->channel->wait();
         }
+
+        $this->channel->close();
+        $this->connection->close();
     }
 }
