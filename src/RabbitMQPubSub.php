@@ -18,7 +18,6 @@ class RabbitMQPubSub
      */
     public function __construct()
     {
-        Log::info(json_encode(config('rabbitMQPubSub.connection')));
         $this->connection = new AMQPStreamConnection(
             config('rabbitMQPubSub.connection.host'),
             config('rabbitMQPubSub.connection.port'),
@@ -40,7 +39,6 @@ class RabbitMQPubSub
 
     public function publish(string $topicName, string $data)
     {
-        Log::info("Publish message to $topicName with data $data");
         $this->getTopicChannel($topicName)->basic_publish(new AMQPMessage($data), $topicName);
     }
 }
