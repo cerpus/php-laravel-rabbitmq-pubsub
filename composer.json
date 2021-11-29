@@ -1,0 +1,47 @@
+{
+    "name": "cerpus/laravel-rabbitmq-pubsub",
+    "description": "Client for RabbitMQ pubsub in a laravel project",
+    "minimum-stability": "stable",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Max Moeschinger",
+            "email": "max.moeschinger@cerpus.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6.3.3|^7.0",
+        "guzzlehttp/promises": "^1.4",
+        "illuminate/support": "^8.73",
+        "php-amqplib/php-amqplib": "3.0.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "9.5.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cerpus\\LaravelRabbitMQPubSub\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cerpus\\LaravelRabbitMQPubSub\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Cerpus\\LaravelRabbitMQPubSub\\ServiceProvider"
+            ],
+            "facades": [
+                "Cerpus\\LaravelRabbitMQPubSub\\RabbitMQPubSub"
+            ]
+        }
+    }
+}
