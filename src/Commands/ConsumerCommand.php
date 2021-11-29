@@ -2,7 +2,7 @@
 
 namespace Cerpus\LaravelRabbitMQPubSub\Commands;
 
-
+use Cerpus\LaravelRabbitMQPubSub\Facades\RabbitMQPubSub;
 use Illuminate\Console\Command;
 
 class ConsumerCommand extends Command
@@ -13,5 +13,6 @@ class ConsumerCommand extends Command
     public function handle()
     {
         $this->info("working");
+        RabbitMQPubSub::setupConsumer();
     }
 }
