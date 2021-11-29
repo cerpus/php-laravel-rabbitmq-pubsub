@@ -18,6 +18,7 @@ class RabbitMQPubSub
      */
     public function __construct()
     {
+        Log::info(json_encode(config('rabbitMQPubSub.connection')));
         $this->connection = new AMQPStreamConnection(
             config('rabbitMQPubSub.connection.host'),
             config('rabbitMQPubSub.connection.port'),
