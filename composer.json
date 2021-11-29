@@ -37,7 +37,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Cerpus\\LaravelRabbitMQPubSub\\ServiceProvider"
+                "Cerpus\\LaravelRabbitMQPubSub\\RabbitMQPubSubServiceProvider"
             ],
             "facades": [
                 "Cerpus\\LaravelRabbitMQPubSub\\RabbitMQPubSub"
