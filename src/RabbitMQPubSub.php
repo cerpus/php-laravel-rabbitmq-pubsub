@@ -73,8 +73,9 @@ class RabbitMQPubSub
                 $this->channel->queue_declare($subscriptionName, false, true, false, false);
                 $this->channel->queue_bind($subscriptionName, $topicName);
 
-                $callback = function ($msg) use ($handler) {
+                $callback = function (AMQPMessage $msg) use ($handler) {
                     $handler->consume($msg->body);
+                    $msg->ack();
                 };
 
                 $this->channel->basic_consume($subscriptionName, '', false, false, false, false, $callback);
