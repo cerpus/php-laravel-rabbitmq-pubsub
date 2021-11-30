@@ -8,6 +8,6 @@ class RabbitMQPubSub extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'rabbitMQPubSub';
+        return \Cerpus\LaravelRabbitMQPubSub\RabbitMQPubSub::class;
     }
 }

@@ -32,13 +32,13 @@ class RabbitMQPubSub
         }
     }
 
-    public function publish(string $topicName, string $data)
+    public function publish(string $topicName, string $data): void
     {
         $this->ensureTopicIsDeclared($topicName);
         $this->channel->basic_publish(new AMQPMessage($data), $topicName);
     }
 
-    public function setupConsumer()
+    public function setupConsumer(): void
     {
         if (!config('rabbitMQPubSub.consumers')) {
             throw new LaravelRabbitMQPubSubException("Missing config rabbitMQPubSub.consumers");
@@ -65,7 +65,7 @@ class RabbitMQPubSub
                     throw new LaravelRabbitMQPubSubException("Class does not exists: " . $subscriptionInfo['handler']);
                 }
 
-                $handler = new $subscriptionInfo['handler']();
+                $handler = app()->make($subscriptionInfo['handler']);
 
                 if (!($handler instanceof RabbitMQPubSubConsumerHandler)) {
                     throw new LaravelRabbitMQPubSubException("Handler does not implement RabbitMQPubSubConsumerHandler");

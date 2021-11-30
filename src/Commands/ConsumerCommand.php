@@ -12,7 +12,7 @@ class ConsumerCommand extends Command
 
     public function handle()
     {
-        $this->info("working");
+        $this->info("Processing queues");
         RabbitMQPubSub::setupConsumer();
     }
 }
