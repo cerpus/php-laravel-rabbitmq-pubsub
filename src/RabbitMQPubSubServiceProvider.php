@@ -20,11 +20,11 @@ class RabbitMQPubSubServiceProvider extends ServiceProvider
 
     public function register()
     {
-        App::bind('rabbitMQPubSub', function (Application $app) {
+        App::singleton(RabbitMQPubSub::class, function (Application $app) {
             return new RabbitMQPubSub($app->make(RabbitMQConnectionManager::class));
         });
 
-        App::bind(RabbitMQConnectionManager::class, function () {
+        App::singleton(RabbitMQConnectionManager::class, function () {
             return new RabbitMQConnectionManager();
         });
     }
