@@ -3,13 +3,16 @@
 namespace Cerpus\LaravelRabbitMQPubSub;
 
 use Cerpus\LaravelRabbitMQPubSub\Exceptions\LaravelRabbitMQPubSubException;
+use ErrorException;
 use Exception;
+use Illuminate\Foundation\Application;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AbstractConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
 class RabbitMQPubSub
 {
+    private Application $application;
     private AbstractConnection $connection;
     private AMQPChannel $channel;
     private array $declaredChannels = [];
@@ -18,8 +21,12 @@ class RabbitMQPubSub
     /**
      * @throws Exception
      */
-    public function __construct(RabbitMQConnectionManager $rabbitMQConnectionManager)
+    public function __construct(
+        Application $application,
+        RabbitMQConnectionManager $rabbitMQConnectionManager
+    )
     {
+        $this->application = $application;
         $this->connection = $rabbitMQConnectionManager->getConnection();
         $this->channel = $this->connection->channel();
     }
@@ -38,6 +45,10 @@ class RabbitMQPubSub
         $this->channel->basic_publish(new AMQPMessage($data), $topicName);
     }
 
+    /**
+     * @throws LaravelRabbitMQPubSubException
+     * @throws ErrorException
+     */
     public function setupConsumer(): void
     {
         if (!config('rabbitMQPubSub.consumers')) {
@@ -65,7 +76,7 @@ class RabbitMQPubSub
                     throw new LaravelRabbitMQPubSubException("Class does not exists: " . $subscriptionInfo['handler']);
                 }
 
-                $handler = app()->make($subscriptionInfo['handler']);
+                $handler = $this->application->make($subscriptionInfo['handler']);
 
                 if (!($handler instanceof RabbitMQPubSubConsumerHandler)) {
                     throw new LaravelRabbitMQPubSubException("Handler does not implement RabbitMQPubSubConsumerHandler");
