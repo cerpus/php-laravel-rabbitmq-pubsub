@@ -6,6 +6,7 @@ use Cerpus\LaravelRabbitMQPubSub\Exceptions\LaravelRabbitMQPubSubException;
 use Cerpus\LaravelRabbitMQPubSub\Tests\Dummies\HandlerImplementation;
 use Cerpus\PubSub\Connection\ConnectionFactory;
 use Cerpus\PubSub\Connection\ConnectionInterface;
+use Closure;
 use Illuminate\Support\Facades\Artisan;
 
 class ConfigurationTest extends TestCase
@@ -145,6 +146,14 @@ class ConfigurationTest extends TestCase
         $mockConnection
             ->expects($this->once())
             ->method('listen');
+        $mockConnection
+            ->expects($this->exactly(3))
+            ->method('subscribe')
+            ->withConsecutive(
+                ['test', 'test', $this->isInstanceOf(Closure::class)],
+                ['test2', 'test', $this->isInstanceOf(Closure::class)],
+                ['test3', 'test2', $this->isInstanceOf(Closure::class)],
+            );
         $this->instance(ConnectionInterface::class, $mockConnection);
 
         $this->artisan('laravel-rabbitmq-pubsub:consumer')->assertSuccessful();
