@@ -11,17 +11,16 @@
         }
     ],
     "require": {
-        "php": ">=7.4",
-        "ext-json": "*",
+        "php": "^8.0",
+        "cerpus/pubsub": "^0.1.0",
         "guzzlehttp/guzzle": "^6.3.3|^7.0",
         "guzzlehttp/promises": "^1.4",
         "illuminate/console": "^8.73",
-        "illuminate/support": "^8.73",
-        "php-amqplib/php-amqplib": "3.0.*"
+        "illuminate/support": "^8.73"
     },
     "require-dev": {
         "orchestra/testbench": "^6.23",
-        "phpunit/phpunit": "9.5.10"
+        "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "psr-4": {

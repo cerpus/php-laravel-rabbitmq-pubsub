@@ -3,11 +3,10 @@
 namespace Cerpus\LaravelRabbitMQPubSub\Tests;
 
 use Cerpus\LaravelRabbitMQPubSub\Exceptions\LaravelRabbitMQPubSubException;
-use Cerpus\LaravelRabbitMQPubSub\RabbitMQConnectionManager;
 use Cerpus\LaravelRabbitMQPubSub\Tests\Dummies\HandlerImplementation;
+use Cerpus\PubSub\Connection\ConnectionFactory;
+use Cerpus\PubSub\Connection\ConnectionInterface;
 use Illuminate\Support\Facades\Artisan;
-use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 class ConfigurationTest extends TestCase
 {
@@ -26,7 +25,7 @@ class ConfigurationTest extends TestCase
                         ]
                     ]
                 ],
-                'errorMessage' => 'Missing subscriptions key for rabbitMQPubSub.consumers.test'
+                'errorMessage' => 'Missing config rabbitMQPubSub.consumers.test.subscriptions',
             ],
             'Unknown handler' => [
                 'configData' => [
@@ -42,7 +41,7 @@ class ConfigurationTest extends TestCase
                         ]
                     ]
                 ],
-                'errorMessage' => 'Class does not exists: smth'
+                'errorMessage' => 'Cannot create handler smth',
             ],
             'Handler not implementing RabbitMQPubSubConsumerHandler' => [
                 'configData' => [
@@ -72,7 +71,7 @@ class ConfigurationTest extends TestCase
                         ]
                     ]
                 ],
-                'errorMessage' => 'Missing handler declaration for rabbitMQPubSub.consumers.test.subscriptions.test'
+                'errorMessage' => 'Missing config rabbitMQPubSub.consumers.test.subscriptions.test.handler',
             ],
             'Duplicate subscription' => [
                 'configData' => [
@@ -106,14 +105,10 @@ class ConfigurationTest extends TestCase
     public function testThrowsOnInvalidConsumersConfigTest(array $configData, string $errorMessage)
     {
         config($configData);
-        $connectionManager = $this->getMockBuilder(RabbitMQConnectionManager::class)->disableOriginalConstructor()->getMock();
-        $this->instance(RabbitMQConnectionManager::class, $connectionManager);
-
-        $mockConnection = $this->getMockBuilder(AMQPStreamConnection::class)->disableOriginalConstructor()->getMock();
-        $mockChannel    = $this->getMockBuilder(AMQPChannel::class)->disableOriginalConstructor()->getMock();
-
-        $connectionManager->expects($this->any())->method('getConnection')->willReturn($mockConnection);
-        $mockConnection->expects($this->any())->method('channel')->willReturn($mockChannel);
+        $connection = $this->getMockBuilder(ConnectionInterface::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->instance(ConnectionInterface::class, $connection);
 
         $this->expectException(LaravelRabbitMQPubSubException::class);
         $this->expectExceptionMessage($errorMessage);
@@ -146,20 +141,13 @@ class ConfigurationTest extends TestCase
             ]
         ]);
 
-        $connectionManager = $this->getMockBuilder(RabbitMQConnectionManager::class)->disableOriginalConstructor()->getMock();
-        $this->instance(RabbitMQConnectionManager::class, $connectionManager);
+        $mockConnection = $this->createMock(ConnectionInterface::class);
+        $mockConnection
+            ->expects($this->once())
+            ->method('listen');
+        $this->instance(ConnectionInterface::class, $mockConnection);
 
-        $mockConnection = $this->getMockBuilder(AMQPStreamConnection::class)->disableOriginalConstructor()->getMock();
-        $mockChannel    = $this->getMockBuilder(AMQPChannel::class)->disableOriginalConstructor()->getMock();
-
-        $connectionManager->expects($this->exactly(1))->method('getConnection')->willReturn($mockConnection);
-        $mockConnection->expects($this->exactly(1))->method('channel')->willReturn($mockChannel);
-        $mockChannel->expects($this->exactly(2))->method('exchange_declare');
-        $mockChannel->expects($this->exactly(3))->method('queue_declare');
-        $mockChannel->expects($this->exactly(3))->method('queue_bind');
-        $mockChannel->expects($this->exactly(3))->method('basic_consume');
-
-        Artisan::call('laravel-rabbitmq-pubsub:consumer');
+        $this->artisan('laravel-rabbitmq-pubsub:consumer')->assertSuccessful();
     }
 
     public function invalidConnectionConfigurationDataProvider(): array
@@ -234,6 +222,6 @@ class ConfigurationTest extends TestCase
         $this->expectException(LaravelRabbitMQPubSubException::class);
         $this->expectExceptionMessage($errorMessage);
 
-        new RabbitMQConnectionManager();
+        $this->app->make(ConnectionFactory::class);
     }
 }

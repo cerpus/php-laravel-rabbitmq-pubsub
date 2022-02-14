@@ -2,7 +2,7 @@
 
 namespace Cerpus\LaravelRabbitMQPubSub\Commands;
 
-use Cerpus\LaravelRabbitMQPubSub\Facades\RabbitMQPubSub;
+use Cerpus\PubSub\PubSub;
 use Illuminate\Console\Command;
 
 class ConsumerCommand extends Command
@@ -10,9 +10,16 @@ class ConsumerCommand extends Command
     protected $signature = 'laravel-rabbitmq-pubsub:consumer';
     protected $description = 'Consume messages from rabbitmq';
 
+    public function __construct(private PubSub $pubSub)
+    {
+        parent::__construct();
+    }
+
     public function handle()
     {
         $this->info("Processing queues");
-        RabbitMQPubSub::setupConsumer();
+
+        $this->pubSub->listen();
+        $this->pubSub->close();
     }
 }

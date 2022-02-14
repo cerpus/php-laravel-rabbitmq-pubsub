@@ -1,104 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Cerpus\LaravelRabbitMQPubSub;
 
-use Cerpus\LaravelRabbitMQPubSub\Exceptions\LaravelRabbitMQPubSubException;
-use ErrorException;
-use Exception;
-use Illuminate\Foundation\Application;
-use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Connection\AbstractConnection;
-use PhpAmqpLib\Message\AMQPMessage;
+use Cerpus\PubSub\PubSub;
 
+/**
+ * @deprecated Use {@link \Cerpus\PubSub\PubSub} instead.
+ */
 class RabbitMQPubSub
 {
-    private Application $application;
-    private AbstractConnection $connection;
-    private AMQPChannel $channel;
-    private array $declaredChannels = [];
-    private array $declaredQueues = [];
-
-    /**
-     * @throws Exception
-     */
-    public function __construct(
-        Application $application,
-        RabbitMQConnectionManager $rabbitMQConnectionManager
-    )
+    public function __construct(private PubSub $pubSub)
     {
-        $this->application = $application;
-        $this->connection = $rabbitMQConnectionManager->getConnection();
-        $this->channel = $this->connection->channel();
     }
 
-    private function ensureTopicIsDeclared(string $topicName): void
+    public function setupConsumer(): void
     {
-        if (!in_array($topicName, $this->declaredChannels)) {
-            $this->declaredChannels[] = $topicName;
-            $this->channel->exchange_declare($topicName, 'fanout', false, true, false);
-        }
+        // no-op, kept for backward compat
     }
 
     public function publish(string $topicName, string $data): void
     {
-        $this->ensureTopicIsDeclared($topicName);
-        $this->channel->basic_publish(new AMQPMessage($data), $topicName);
-    }
-
-    /**
-     * @throws LaravelRabbitMQPubSubException
-     * @throws ErrorException
-     */
-    public function setupConsumer(): void
-    {
-        if (!config('rabbitMQPubSub.consumers')) {
-            throw new LaravelRabbitMQPubSubException("Missing config rabbitMQPubSub.consumers");
-        }
-
-        foreach (config('rabbitMQPubSub.consumers') as $topicName => $topicInfo) {
-            $this->ensureTopicIsDeclared($topicName);
-            if (!array_key_exists('subscriptions', $topicInfo)) {
-                throw new LaravelRabbitMQPubSubException("Missing subscriptions key for rabbitMQPubSub.consumers.$topicName");
-            }
-
-            foreach ($topicInfo['subscriptions'] as $subscriptionName => $subscriptionInfo) {
-                if (in_array($subscriptionName, $this->declaredQueues)) {
-                    throw new LaravelRabbitMQPubSubException("Duplicate subscription $subscriptionName");
-                }
-
-                $this->declaredQueues[] = $subscriptionName;
-
-                if (!array_key_exists('handler', $subscriptionInfo)) {
-                    throw new LaravelRabbitMQPubSubException("Missing handler declaration for rabbitMQPubSub.consumers.$topicName.subscriptions.$subscriptionName");
-                }
-
-                if (!class_exists($subscriptionInfo['handler'])) {
-                    throw new LaravelRabbitMQPubSubException("Class does not exists: " . $subscriptionInfo['handler']);
-                }
-
-                $handler = $this->application->make($subscriptionInfo['handler']);
-
-                if (!($handler instanceof RabbitMQPubSubConsumerHandler)) {
-                    throw new LaravelRabbitMQPubSubException("Handler does not implement RabbitMQPubSubConsumerHandler");
-                }
-
-                $this->channel->queue_declare($subscriptionName, false, true, false, false);
-                $this->channel->queue_bind($subscriptionName, $topicName);
-
-                $callback = function (AMQPMessage $msg) use ($handler) {
-                    $handler->consume($msg->body);
-                    $msg->ack();
-                };
-
-                $this->channel->basic_consume($subscriptionName, '', false, false, false, false, $callback);
-            }
-        }
-
-        while ($this->channel->is_open()) {
-            $this->channel->wait();
-        }
-
-        $this->channel->close();
-        $this->connection->close();
+        $this->pubSub->publish($topicName, $data);
     }
 }
