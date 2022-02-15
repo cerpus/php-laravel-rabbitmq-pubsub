@@ -5,7 +5,9 @@ namespace Cerpus\LaravelRabbitMQPubSub\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @deprecated Use {@link \Cerpus\LaravelRabbitMQPubSub\Facades\PubSub} instead.
+ * @method static void publish(string $topicName, string $data)
+ * @method static void setupConsumer()
+ * @method static void listenWithConsumersSetUp()
  * @see \Cerpus\LaravelRabbitMQPubSub\RabbitMQPubSub
  */
 class RabbitMQPubSub extends Facade

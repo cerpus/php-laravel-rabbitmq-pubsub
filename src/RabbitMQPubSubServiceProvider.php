@@ -25,50 +25,20 @@ class RabbitMQPubSubServiceProvider extends ServiceProvider implements Deferrabl
 
     public function register()
     {
+        $this->app->singleton(RabbitMQPubSub::class, function () {
+            return new RabbitMQPubSub(
+                $this->app->make(PubSub::class),
+                $this->app,
+                config('rabbitMQPubSub.consumers')
+                    ?? throw MissingConfigException::create('rabbitMQPubSub.consumers'),
+            );
+        });
+
         $this->app->singleton(PubSub::class, function () {
             /** @var ConnectionInterface $connection */
             $connection = $this->app->make(ConnectionInterface::class);
-            $pubSub = new PubSub($connection);
 
-            $consumers = config('rabbitMQPubSub.consumers')
-                ?? throw MissingConfigException::create('rabbitMQPubSub.consumers');
-
-            $declaredQueues = [];
-
-            foreach ($consumers as $topicName => $topicInfo) {
-                if (!array_key_exists('subscriptions', $topicInfo)) {
-                    throw MissingConfigException::create("rabbitMQPubSub.consumers.$topicName.subscriptions");
-                }
-
-                foreach ($topicInfo['subscriptions'] as $subscriptionName => $subscriptionInfo) {
-                    if (in_array($subscriptionName, $declaredQueues, true)) {
-                        throw new LaravelRabbitMQPubSubException("Duplicate subscription $subscriptionName");
-                    }
-                    $declaredQueues[] = $subscriptionName;
-
-                    if (!isset($subscriptionInfo['handler'])) {
-                        throw MissingConfigException::create("rabbitMQPubSub.consumers.$topicName.subscriptions.$subscriptionName.handler");
-                    }
-
-                    try {
-                        $handler = $this->app->make($subscriptionInfo['handler']);
-                    } catch (BindingResolutionException) {
-                        throw new LaravelRabbitMQPubSubException('Cannot create handler '.$subscriptionInfo['handler']);
-                    }
-
-                    if (!$handler instanceof RabbitMQPubSubConsumerHandler) {
-                        throw new LaravelRabbitMQPubSubException("Handler does not implement RabbitMQPubSubConsumerHandler");
-                    }
-
-                    $pubSub->subscribe(
-                        $subscriptionName,
-                        $topicName,
-                        fn(string $data) => $handler->consume($data),
-                    );
-                }
-            }
-
-            return $pubSub;
+            return new PubSub($connection);
         });
 
         $this->app->singleton(ConnectionInterface::class, function () {
@@ -107,6 +77,7 @@ class RabbitMQPubSubServiceProvider extends ServiceProvider implements Deferrabl
             PubSub::class,
             ConnectionInterface::class,
             ConnectionFactory::class,
+            RabbitMQPubSub::class,
         ];
     }
 }

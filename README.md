@@ -5,6 +5,7 @@ Laravel.
 
 ## Provided services
 
+* `Cerpus\LaravelRabbitMQPubSub\RabbitMQPubSub`
 * `Cerpus\PubSub\PubSub`
 * `Cerpus\PubSub\Connection\ConnectionFactory`
 * `Cerpus\PubSub\Connection\ConnectionInterface`
