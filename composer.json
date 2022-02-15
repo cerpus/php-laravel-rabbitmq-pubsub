@@ -12,9 +12,7 @@
     ],
     "require": {
         "php": "^8.0",
-        "cerpus/pubsub": "^0.1.0",
-        "guzzlehttp/guzzle": "^6.3.3|^7.0",
-        "guzzlehttp/promises": "^1.4",
+        "cerpus/pubsub": "^1.0.0",
         "illuminate/console": "^8.73",
         "illuminate/support": "^8.73"
     },
