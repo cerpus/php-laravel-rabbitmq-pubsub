@@ -27,7 +27,7 @@ class RabbitMQPubSubServiceProvider extends ServiceProvider implements Deferrabl
     {
         $this->app->singleton(RabbitMQPubSub::class, function () {
             return new RabbitMQPubSub(
-                $this->app->make(PubSub::class),
+                fn() => $this->app->make(PubSub::class),
                 $this->app,
                 config('rabbitMQPubSub.consumers')
                     ?? throw MissingConfigException::create('rabbitMQPubSub.consumers'),
