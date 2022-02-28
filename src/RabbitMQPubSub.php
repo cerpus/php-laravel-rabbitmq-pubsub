@@ -7,6 +7,7 @@ namespace Cerpus\LaravelRabbitMQPubSub;
 use Cerpus\LaravelRabbitMQPubSub\Exceptions\LaravelRabbitMQPubSubException;
 use Cerpus\LaravelRabbitMQPubSub\Exceptions\MissingConfigException;
 use Cerpus\PubSub\PubSub;
+use Closure;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\Container;
 
@@ -14,8 +15,11 @@ class RabbitMQPubSub
 {
     private array $declaredQueues = [];
 
+    /**
+     * @param PubSub|Closure():PubSub $pubSub
+     */
     public function __construct(
-        private PubSub $pubSub,
+        private PubSub|Closure $pubSub,
         private Container $container,
         private array $consumers,
     ) {
@@ -27,6 +31,8 @@ class RabbitMQPubSub
      */
     public function setupConsumer(): void
     {
+        $this->connect();
+
         foreach ($this->consumers as $topicName => $topicInfo) {
             if (!array_key_exists('subscriptions', $topicInfo)) {
                 throw MissingConfigException::create("rabbitMQPubSub.consumers.$topicName.subscriptions");
@@ -63,6 +69,8 @@ class RabbitMQPubSub
 
     public function publish(string $topicName, string $data): void
     {
+        $this->connect();
+
         $this->pubSub->publish($topicName, $data);
     }
 
@@ -74,5 +82,12 @@ class RabbitMQPubSub
         $this->setupConsumer();
 
         $this->pubSub->listen();
+    }
+
+    private function connect(): void
+    {
+        if ($this->pubSub instanceof Closure) {
+            $this->pubSub = ($this->pubSub)();
+        }
     }
 }
